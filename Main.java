@@ -6,6 +6,17 @@ class ShapeDrawing extends JComponent {
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.drawRect(100, 150, 60, 100);
+        
+        int x[] = {200, 250, 210};
+        int y[] = {100, 80, 150};
+        int numPoints = 3;
+        g.setColor(Color.ORANGE);
+        g.fillPolygon(x,y,numPoints);
+        g.setColor(Color.BLACK);
+        g.drawPolygon(x, y, numPoints);
+        
+
+
     }
 }
 
