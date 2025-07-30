@@ -192,18 +192,6 @@ class Renderer {
 
     public void renderScene(Scene scene, Camera camera) {
         SwingUtilities.invokeLater(() -> window.panel.repaint());
-
-        // Graphics2D g = (Graphics2D) window.getGraphics();
-
-        // //clear screen
-        // g.setColor(Color.BLACK);
-        // g.fillRect(0,0,window.getWidth(),window.getHeight());
-
-        // //draw stuff
-        // g.setColor(Color.WHITE);
-        // for (SceneObject obj : scene.getObjects()) {
-        //     obj.render(g, camera, window.getWidth(), window.getHeight());
-        // }
     }
 }
 
@@ -385,53 +373,6 @@ class Cube extends SceneObject {
 
         return renderList;
     }
-
-
-
-
-    // @Override
-    // public void render(Graphics2D g, Camera cam, int width, int height) {
-    //     //project all vertices first
-    //     Point2D[] projected = new Point2D[vertices.length];
-    //     Point3D[] worldVerts = new Point3D[vertices.length];
-    //     for (int i=0; i<vertices.length; i++) {
-    //         worldVerts[i] = vertices[i].add(pos);
-    //         projected[i] = cam.project(worldVerts[i], width, height);
-    //     }
-
-    //     // //draw edges
-    //     // g.setColor(Color.WHITE);
-    //     // for (Edge e : edges) {
-    //     //     Point2D p1 = projected[e.start];
-    //     //     Point2D p2 = projected[e.end];
-
-    //     //     if (p1!=null && p2!=null) {
-    //     //         g.drawLine( (int) p1.getX(), (int) p1.getY(), 
-    //     //                     (int) p2.getX(), (int) p2.getY());
-    //     //     }
-    //     // }
-
-    //     //draw faces
-    //     for (Face f : faces) {
-    //         Point3D normal = f.getNormal(vertices, pos); //compute face normal
-    //         Point3D toCamera = cam.pos.subtract(worldVerts[f.v1]); //vector from camera to the first vertex of the face
-            
-    //         //if dot prodcut<0, face is visible
-    //         if (normal.dot(toCamera) < 0) {
-    //             Point2D p1 = projected[f.v1];
-    //             Point2D p2 = projected[f.v2];
-    //             Point2D p3 = projected[f.v3];
-    //             if (p1!=null && p2!=null && p3!=null) {
-    //                 int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
-    //                 int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
-    //                 g.setColor(f.color);
-    //                 g.fillPolygon(xPoints, yPoints, 3);
-    //                 g.setColor(Color.BLACK);
-    //                 g.drawPolygon(xPoints, yPoints, 3);
-    //             }
-    //         }
-    //     }
-    // }
 }
 
 
