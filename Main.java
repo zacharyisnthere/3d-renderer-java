@@ -180,7 +180,7 @@ abstract class SceneObject {
 
 
 class Camera {
-    public Point3D pos = new Point3D(3,5,-15);
+    public Point3D pos = new Point3D(5,3,-15);
     //rotation variable
 
     //camera variables, will be more useful later
@@ -197,8 +197,11 @@ class Camera {
         if (z<=clip_near) return null;
 
         // projection math and stuff. screenY is flipped because 0,0 is top left which is odd.
+
+        double aspect = (double) screenWidth / screenHeight;
         double f = 1.0 / Math.tan(Math.toRadians(fov) / 2);
-        double screenX = (x / z) * f * screenWidth/2 + screenWidth/2;
+        
+        double screenX = (x / z) * f/aspect * screenWidth/2 + screenWidth/2;
         double screenY = (-y / z) * f * screenHeight/2 + screenHeight/2;
 
         return new Point2D.Double(screenX, screenY);

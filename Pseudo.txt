@@ -8,8 +8,11 @@ Math helpers
 
 
 TODO:
-- create the loop and function structure
-- 
+- aspect ratio corrections
+- make cube spin?
+- render edges between vertexes on cube
+- render faces on cube
+- add camera controls (rotation, position)
 
 
 
