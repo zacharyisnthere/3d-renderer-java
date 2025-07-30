@@ -142,6 +142,10 @@ class Scene {
         return objects;
     }
 
+    public void setObjects(java.util.List<SceneObject> new_objects) {
+        this.objects = new_objects;
+    }
+
     public void add(SceneObject o) {
         objects.add(o);
     }
