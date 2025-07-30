@@ -15,6 +15,8 @@ class Engine {
     private Window window;
     private Renderer renderer;
     private InputManager input;
+    private Scene scene;
+    private Camera camera;
     private boolean running;
     private final int TARGET_FPS = 60;
 
@@ -27,6 +29,10 @@ class Engine {
         window = new Window("3D Renderer", 800, 600);
         renderer = new Renderer(window);
         input = new InputManager(window);
+        scene = new Scene();
+        camera = new Camera();
+
+        scene.objects.add(new Cube());
         running = true;
     }
 
@@ -38,7 +44,7 @@ class Engine {
 
             input.update();
             update();          // game logic
-            renderer.render(); // draw to screen
+            renderer.renderScene(scene, camera); // draw to screen
 
             long duration = System.currentTimeMillis() - start;
             sleep(frameTime - duration); // maintains fps
@@ -95,7 +101,20 @@ class Renderer {
     }
 
     public void renderScene(Scene scene, Camera camera) {
-        Graphics2D g = (Graphics)
+        Graphics2D g = (Graphics2D) window.getGraphics();
+
+        //clear screen
+        g.setColor(Color.BLACK);
+        g.fillRect(0,0,window.getWidth(),window.getHeight());
+
+        //draw stuff
+        g.setColor(Color.WHITE);
+        for (SceneObject obj : scene.objects) {
+            obj.render(g, camera, window.getWidth(), window.getHeight());
+        }
+
+
+
     }
 }
 
@@ -113,12 +132,14 @@ class InputManager {
 
 
 class Scene {
-
+    public java.util.List<SceneObject> objects = new java.util.ArrayList<>();
 }
 
 
-class SceneObject {
-
+// abstract means it cannot be instantiated on its own, which is important.
+abstract class SceneObject {
+    // abstract on a method requires every class that extends this one to provide its own implementation of this method.
+    public abstract void render(Graphics2D g, Camera camera, int width, int height);
 }
 
 
@@ -171,6 +192,13 @@ class Cube extends SceneObject {
         };
     }
 
+    @Override
+    public void render(Graphics2D g, Camera cam, int width, int height) {
+        for (Point3D v: vertices) {
+            Point2D p = cam.project(v, width, height);
+            g.fillOval((int)p.getX(), (int)p.getY(), 5, 5);
+        }
+    }
 }
 
 
