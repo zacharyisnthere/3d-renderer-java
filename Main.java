@@ -39,19 +39,29 @@ class Engine {
         renderer = new Renderer(window);
         input = new InputManager(window);
 
-        scene.add(new Cube());
+        Cube cube1 = new Cube();
+        Cube cube2 = new Cube();
+
+        cube2.pos.x = 5;
+
+        scene.add(cube1);
+        scene.add(cube2);
         running = true;
     }
 
     private void runLoop() {
         long frameTime = 1000 / TARGET_FPS;
+        long lastFrameTime = System.currentTimeMillis();
 
         while (running) {
             long start = System.currentTimeMillis();
+            double delta = (start - lastFrameTime) / 1000.0;
+            delta = Math.min(delta, 0.05); //cap at ~20fps 
 
-            update();
+            update(delta);
             renderer.renderScene(scene, camera);
 
+            lastFrameTime = start;
             long duration = System.currentTimeMillis() - start;
             sleep(frameTime - duration);
         }
@@ -69,44 +79,42 @@ class Engine {
         }
     }
 
-    private void update() {
-        double moveSpeed = 0.01;
-        double rotSpeed = 0.001;
-        double frameMoveSpeed = moveSpeed * 1000/TARGET_FPS;
-        double frameRotSpeed = rotSpeed * 1000/TARGET_FPS;
+    private void update(double delta) {
+        double moveSpeed = 7;
+        double rotSpeed = .9;
 
         //movement (relative to yaw)
         double forwardX = Math.sin(camera.yaw);
         double forwardZ = Math.cos(camera.yaw);
 
         if (input.isKeyPressed(KeyEvent.VK_W)) {
-            camera.pos.x += forwardX * frameMoveSpeed;
-            camera.pos.z += forwardZ * frameMoveSpeed;
+            camera.pos.x += forwardX * moveSpeed * delta;
+            camera.pos.z += forwardZ * moveSpeed * delta;
         }
         if (input.isKeyPressed(KeyEvent.VK_S)) {
-            camera.pos.x -= forwardX * frameMoveSpeed;
-            camera.pos.z -= forwardZ * frameMoveSpeed;
+            camera.pos.x -= forwardX * moveSpeed * delta;
+            camera.pos.z -= forwardZ * moveSpeed * delta;
         }
         if (input.isKeyPressed(KeyEvent.VK_A)) {
-            camera.pos.x -= forwardZ * frameMoveSpeed;
-            camera.pos.z += forwardX * frameMoveSpeed;
+            camera.pos.x -= forwardZ * moveSpeed * delta;
+            camera.pos.z += forwardX * moveSpeed * delta;
         }
         if (input.isKeyPressed(KeyEvent.VK_D)) {
-            camera.pos.x += forwardZ * frameMoveSpeed;
-            camera.pos.z -= forwardX * frameMoveSpeed;
+            camera.pos.x += forwardZ * moveSpeed * delta;
+            camera.pos.z -= forwardX * moveSpeed * delta;
         }
         if (input.isKeyPressed(KeyEvent.VK_Q)) {
-            camera.pos.y -= frameMoveSpeed;
+            camera.pos.y -= moveSpeed * delta;
         }
         if (input.isKeyPressed(KeyEvent.VK_E)) {
-            camera.pos.y += frameMoveSpeed;
+            camera.pos.y += moveSpeed * delta;
         }
 
         // Rotation
-        if (input.isKeyPressed(KeyEvent.VK_LEFT))  camera.yaw -= frameRotSpeed;
-        if (input.isKeyPressed(KeyEvent.VK_RIGHT)) camera.yaw += frameRotSpeed;
-        if (input.isKeyPressed(KeyEvent.VK_UP))    camera.pitch += frameRotSpeed;
-        if (input.isKeyPressed(KeyEvent.VK_DOWN))  camera.pitch -= frameRotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_LEFT))  camera.yaw -= rotSpeed * delta;
+        if (input.isKeyPressed(KeyEvent.VK_RIGHT)) camera.yaw += rotSpeed * delta;
+        if (input.isKeyPressed(KeyEvent.VK_UP))    camera.pitch += rotSpeed * delta;
+        if (input.isKeyPressed(KeyEvent.VK_DOWN))  camera.pitch -= rotSpeed * delta;
 
         if (input.isKeyPressed(KeyEvent.VK_SPACE)) {
             System.out.println("Space pressed");
