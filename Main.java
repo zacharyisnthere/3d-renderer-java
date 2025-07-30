@@ -167,7 +167,7 @@ abstract class SceneObject {
 
 
 class Camera {
-    public Point3D pos = new Point3D(0,0,0);
+    public Point3D pos = new Point3D(3,5,-15);
     //rotation variable
 
     //camera variables, will be more useful later
@@ -181,10 +181,10 @@ class Camera {
         double y = point.y - pos.y;
         double z = point.z - pos.z;
 
-        // projection math and stuff
+        // projection math and stuff. screenY is flipped because 0,0 is top left which is odd.
         double f = 1.0 / Math.tan(Math.toRadians(fov) / 2);
         double screenX = (x / z) * f * screenWidth/2 + screenWidth/2;
-        double screenY = (y / z) * f * screenHeight/2 + screenHeight/2;
+        double screenY = (-y / z) * f * screenHeight/2 + screenHeight/2;
 
         return new Point2D.Double(screenX, screenY);
     }
@@ -194,7 +194,7 @@ class Camera {
 
 class Cube extends SceneObject {
     //maybe there should just be a general transform class on every Scene object?
-    public Point3D pos = new Point3D(0,0,5);
+    public Point3D pos = new Point3D(0,0,0);
 
     private Point3D[] vertices;
 
