@@ -93,6 +93,10 @@ class Renderer {
         g.setColor(Color.RED);
         g.drawLine(100,100,200,200);
     }
+
+    public void renderScene(Scene scene, Camera camera) {
+        Graphics2D g = (Graphics)
+    }
 }
 
 
@@ -119,13 +123,27 @@ class SceneObject {
 
 
 class Camera {
-    public Point3D pos;
+    public Point3D pos = new Point3D(0,0,0);
     //rotation variable
 
     //camera variables, will be more useful later
     public double fov = 60;
     public double clip_far = 100;
     public double clip_near = 0.01;
+
+
+    public Point2D project(Point3D point, int screenWidth, int screenHeight) {
+        double x = point.x - pos.x;
+        double y = point.y - pos.y;
+        double z = point.z - pos.z;
+
+        // projection math and stuff
+        double f = 1.0 / Math.tan(Math.toRadians(fov) / 2);
+        double screenX = (x / z) * f * screenWidth/2 + screenWidth/2;
+        double screenY = (y / z) * f * screenHeight/2 + screenHeight/2;
+
+        return new Point2D.Double(screenX, screenY);
+    }
     
 }
 
@@ -134,7 +152,11 @@ class Cube extends SceneObject {
     // 8xyz vertices, list of edges
     // render method the projects 3d to 2d based on a given Camera position
 
+    public Point3D pos = new Point3D(0,0,0);
+    //maybe there should just be a general transform class on every Scene object?
+
     private Point3D[] vertices;
+
 
     public Cube() {
         vertices = new Point3D[] {
