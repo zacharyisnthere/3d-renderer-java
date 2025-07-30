@@ -8,7 +8,7 @@ Math helpers
 
 
 TODO:
-- aspect ratio corrections
+X- aspect ratio corrections
 - make cube spin?
 - render edges between vertexes on cube
 - render faces on cube

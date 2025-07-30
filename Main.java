@@ -217,29 +217,46 @@ class Cube extends SceneObject {
     public Point3D pos = new Point3D(0,0,0);
 
     private Point3D[] vertices;
+    private Edge[] edges;
 
 
     public Cube() {
         vertices = new Point3D[] {
-            new Point3D(-1, -1, -1),
-            new Point3D( 1, -1, -1),
-            new Point3D( 1,  1, -1),
-            new Point3D(-1,  1, -1),
-            new Point3D(-1, -1,  1),
-            new Point3D( 1, -1,  1),
-            new Point3D( 1,  1,  1),
-            new Point3D(-1,  1,  1)
+        new Point3D(-1, -1, -1), // 0
+        new Point3D( 1, -1, -1), // 1
+        new Point3D( 1,  1, -1), // 2
+        new Point3D(-1,  1, -1), // 3
+        new Point3D(-1, -1,  1), // 4
+        new Point3D( 1, -1,  1), // 5
+        new Point3D( 1,  1,  1), // 6
+        new Point3D(-1,  1,  1)  // 7
+        };
+
+        edges = new Edge[] {
+            new Edge(0, 1), new Edge(1, 2), new Edge(2, 3), new Edge(3, 0), //bottom square
+            new Edge(4, 5), new Edge(5, 6), new Edge(6, 7), new Edge(7, 4), //top square
+            new Edge(0, 4), new Edge(1, 5), new Edge(2, 6), new Edge(3, 7)  //verticals
         };
     }
 
     @Override
     public void render(Graphics2D g, Camera cam, int width, int height) {
-        for (Point3D local_v: vertices) {
-            Point3D world_v = local_v.add(pos);
+        //project all vertices first
+        Point2D[] projected = new Point2D[vertices.length];
+        for (int i=0; i<vertices.length; i++) {
+            Point3D world_v = vertices[i].add(pos);
+            projected[i] = cam.project(world_v, width, height);
+        }
 
-            Point2D p = cam.project(world_v, width, height);
-            if (p != null) {
-                g.fillOval((int)p.getX(), (int)p.getY(), 5, 5);
+        //draw edges
+        g.setColor(Color.WHITE);
+        for (Edge e : edges) {
+            Point2D p1 = projected[e.start];
+            Point2D p2 = projected[e.end];
+
+            if (p1!=null && p2!=null) {
+                g.drawLine( (int) p1.getX(), (int) p1.getY(), 
+                            (int) p2.getX(), (int) p2.getY());
             }
         }
     }
@@ -284,5 +301,17 @@ class Point3D {
     @Override
     public String toString() {
         return "Point3D(" + x + ", " + y + ", " + z + ")";
+    }
+}
+
+
+class Edge {
+    // the int start and end refer to the specific points in the mesh array.
+    public int start;
+    public int end;
+
+    public Edge(int start, int end) {
+        this.start = start;
+        this.end = end;
     }
 }
