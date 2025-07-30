@@ -9,8 +9,6 @@ import java.util.Set;
 import javax.swing.*;
 import javax.swing.JComponent;
 
-import java.awt.desktop.ScreenSleepEvent; //can I remove this?
-
 public class Main {
     public static void main(String[] args) {
         Engine engine = new Engine();
@@ -72,6 +70,36 @@ class Engine {
     }
 
     private void update() {
+        double moveSpeed = 0.1;
+        double rotSpeed = 0.02;
+
+        //movement (relative to yaw)
+        double forwardX = Math.sin(camera.yaw);
+        double forwardZ = Math.cos(camera.yaw);
+
+        if (input.isKeyPressed(KeyEvent.VK_W)) {
+            camera.pos.x += forwardX * moveSpeed;
+            camera.pos.z += forwardZ * moveSpeed;
+        }
+        if (input.isKeyPressed(KeyEvent.VK_S)) {
+            camera.pos.x -= forwardX * moveSpeed;
+            camera.pos.z -= forwardZ * moveSpeed;
+        }
+        if (input.isKeyPressed(KeyEvent.VK_A)) {
+            camera.pos.x += forwardX * moveSpeed;
+            camera.pos.z += forwardZ * moveSpeed;
+        }
+        if (input.isKeyPressed(KeyEvent.VK_D)) {
+            camera.pos.x += forwardX * moveSpeed;
+            camera.pos.z += forwardZ * moveSpeed;
+        }
+
+        // Rotation
+        if (input.isKeyPressed(KeyEvent.VK_LEFT))  camera.yaw -= rotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_RIGHT)) camera.yaw += rotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_UP))    camera.pitch -= rotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_DOWN))  camera.pitch += rotSpeed;
+
         if (input.isKeyPressed(KeyEvent.VK_SPACE)) {
             System.out.println("Space pressed");
         }
@@ -179,8 +207,8 @@ class Scene {
         return objects;
     }
 
-    public void setObjects(java.util.List<SceneObject> new_objects) {
-        this.objects = new_objects;
+    public void setObjects(java.util.List<SceneObject> newObjects) {
+        this.objects = newObjects;
     }
 
     public void add(SceneObject o) {
@@ -202,21 +230,34 @@ abstract class SceneObject {
 
 
 class Camera {
-    public Point3D pos = new Point3D(5,3,-15);
-    //rotation variable
-
-    //camera variables, will be more useful later
+    public Point3D pos = new Point3D(0,3,-15);
+    //rotation done with radians
+    public double yaw = 0;      // rotation around global y-axis
+    public double pitch = 0;    // rotation around local x-axis
+    
     public double fov = 60;
-    public double clip_far = 100;
-    public double clip_near = 0.01;
+    public double clipFar = 100;
+    public double clipNear = 0.01;
 
 
     public Point2D project(Point3D point, int screenWidth, int screenHeight) {
-        double x = point.x - pos.x;
-        double y = point.y - pos.y;
-        double z = point.z - pos.z;
+        //translate point relative to camera
+        double relX = point.x - pos.x;
+        double relY = point.y - pos.y;
+        double relZ = point.z - pos.z;
 
-        if (z<=clip_near) return null;
+        //apply yaw rotation (global y axis)
+        double cosYaw = Math.cos(yaw), sinYaw = Math.sin(yaw);
+        double rotX = cosYaw * relX - sinYaw * relZ;
+        double rotZ1 = sinYaw * relX + cosYaw * relZ;
+
+        //apply pitch rotatoin (local x axis)
+        double cosPitch = Math.cos(pitch), sinPitch = Math.sin(pitch);
+        double rotY = cosPitch * relY - sinPitch * rotZ1;
+        double rotZ = sinPitch * relY + cosPitch * rotZ1;
+
+        if (rotZ<=clipNear) return null;
+        if (rotZ>=clipFar) return null;
 
         // projection math and stuff. screenY is flipped because 0,0 is top left which is odd.
         // f is the vertical fov, so when the screen isn't square the horizontal scaling is weird.
@@ -225,8 +266,8 @@ class Camera {
         double aspect = (double) screenWidth / screenHeight;
         double f = 1.0 / Math.tan(Math.toRadians(fov) / 2);
         
-        double screenX = (x / z) * f/aspect * screenWidth/2 + screenWidth/2;
-        double screenY = (-y / z) * f * screenHeight/2 + screenHeight/2;
+        double screenX = (rotX / rotZ) * f/aspect * screenWidth/2 + screenWidth/2;
+        double screenY = (-rotY / rotZ) * f * screenHeight/2 + screenHeight/2;
 
         return new Point2D.Double(screenX, screenY);
     }
@@ -266,8 +307,8 @@ class Cube extends SceneObject {
         //project all vertices first
         Point2D[] projected = new Point2D[vertices.length];
         for (int i=0; i<vertices.length; i++) {
-            Point3D world_v = vertices[i].add(pos);
-            projected[i] = cam.project(world_v, width, height);
+            Point3D worldV = vertices[i].add(pos);
+            projected[i] = cam.project(worldV, width, height);
         }
 
         //draw edges
