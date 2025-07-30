@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.lang.reflect.Array;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -358,25 +359,39 @@ class Cube extends SceneObject {
         // }
 
         //draw faces
+
+        List<RenderableFace> renderList = new ArrayList<>();
+
         for (Face f : faces) {
             Point3D normal = f.getNormal(vertices, pos); //compute face normal
             Point3D toCamera = cam.pos.subtract(worldVerts[f.v1]); //vector from camera to the first vertex of the face
-            
+
             //if dot prodcut<0, face is visible
             if (normal.dot(toCamera) < 0) {
-                Point2D p1 = projected[f.v1];
-                Point2D p2 = projected[f.v2];
-                Point2D p3 = projected[f.v3];
-                if (p1!=null && p2!=null && p3!=null) {
-                    int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
-                    int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
-                    g.setColor(f.color);
-                    g.fillPolygon(xPoints, yPoints, 3);
-                    g.setColor(Color.BLACK);
-                    g.drawPolygon(xPoints, yPoints, 3);
-                }
+                double depth = f.getAverageDepth(vertices, pos, cam);
+
+                renderList.add(new RenderableFace(f, projected, depth));
             }
         }
+
+        renderList.sort((a,b) -> Double.compare(b.depth, a.depth));
+
+        for (RenderableFace rf : renderList) {
+            Face f = rf.face;
+            Point2D p1 = rf.projected[f.v1];
+            Point2D p2 = rf.projected[f.v2];
+            Point2D p3 = rf.projected[f.v3];
+            
+            if (p1!=null && p2!=null && p3!=null) {
+                int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
+                int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
+                g.setColor(f.color);
+                g.fillPolygon(xPoints, yPoints, 3);
+                g.setColor(Color.BLACK);
+                g.drawPolygon(xPoints, yPoints, 3);
+            }
+        }
+
     }
 }
 
@@ -472,5 +487,30 @@ class Face {
         Point3D v = p3.subtract(p1);
 
         return u.cross(v).normalize();
+    }
+
+    public double getAverageDepth(Point3D[] vertices, Point3D pos, Camera cam) {
+        Point3D p1 = vertices[v1].add(pos);
+        Point3D p2 = vertices[v2].add(pos);
+        Point3D p3 = vertices[v3].add(pos);
+
+        double z1 = cam.pos.subtract(p1).z;
+        double z2 = cam.pos.subtract(p2).z;
+        double z3 = cam.pos.subtract(p3).z;        
+
+        return (z1 + z2 + z3) / 3.0;
+    }
+}
+
+
+class RenderableFace {
+    public Face face;
+    public Point2D[] projected;
+    public double depth;
+
+    public RenderableFace(Face face, Point2D[] projected, double depth) {
+        this.face = face;
+        this.projected = projected;
+        this.depth = depth;
     }
 }
