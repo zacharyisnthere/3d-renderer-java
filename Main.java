@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Point2D;
+
 import javax.swing.JComponent;
 
 public class Main {
@@ -51,7 +53,7 @@ class Engine {
             } catch (InterruptedException e) {
                 // restore the interrupted status so higher-level code can handle it
                 Thread.currentThread().interrupt();
-                System.out.println("CAUGHT ERROR: Sleep was interrupted");
+                System.out.println("Sleep was interrupted");
             }
         }
     }
@@ -97,3 +99,78 @@ class InputManager {
         //check which keys are down, mouse positions, etc.
     }
 }   
+
+
+
+class Scene {
+
+}
+
+
+class SceneObject {
+
+}
+
+
+class Cube extends SceneObject {
+    // 8xyz vertices, list of edges
+    // render method the projects 3d to 2d based on a given Camera position
+
+    private Point3D[] vertices;
+
+    public Cube() {
+        vertices = new Point3D[] {
+            new Point3D(-1, -1, -1),
+            new Point3D( 1, -1, -1),
+            new Point3D( 1,  1, -1),
+            new Point3D(-1,  1, -1),
+            new Point3D(-1, -1,  1),
+            new Point3D( 1, -1,  1),
+            new Point3D( 1,  1,  1),
+            new Point3D(-1,  1,  1)
+        };
+    }
+
+}
+
+
+
+
+class Point3D {
+    public double x;
+    public double y;
+    public double z;
+
+    public Point3D(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    //copy constructor, used for duplicating the properties of exising points.
+    public Point3D(Point3D p) {
+        this.x = p.x;
+        this.y = p.y;
+        this.z = p.z;
+    }
+
+    //add, subtract, scale functions for convenince
+
+    public Point3D add(Point3D other) {
+        return new Point3D(this.x + other.x, this.y + other.y, this.z + other.z);
+    }
+
+    public Point3D subtract(Point3D other) {
+        return new Point3D(this.x - other.x, this.y - other.y, this.z - other.z);
+    }
+
+    public Point3D scale(double factor) {
+        return new Point3D(this.x * factor, this.y * factor, this.z * factor);
+    }
+
+    //overridden toString function for good debugging later on
+    @Override
+    public String toString() {
+        return "Point3D(" + x + ", " + y + ", " + z + ")";
+    }
+}
