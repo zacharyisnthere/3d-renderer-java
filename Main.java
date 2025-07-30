@@ -1,11 +1,15 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.desktop.ScreenSleepEvent;
+import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.swing.*;
 import javax.swing.JComponent;
+
+import java.awt.desktop.ScreenSleepEvent; //can I remove this?
 
 public class Main {
     public static void main(String[] args) {
@@ -47,7 +51,6 @@ class Engine {
         while (running) {
             long start = System.currentTimeMillis();
 
-            input.update();
             update();
             renderer.renderScene(scene, camera);
 
@@ -69,8 +72,9 @@ class Engine {
     }
 
     private void update() {
-        //update camera, objects, etc.
-        //need a scene class soon
+        if (input.isKeyPressed(KeyEvent.VK_SPACE)) {
+            System.out.println("Space pressed");
+        }
     }
 }
 
@@ -137,15 +141,33 @@ class Renderer {
     }
 }
 
+// implements means InputManager needs to provide all methods declared in interface
+class InputManager implements KeyListener {
+    private final Set<Integer> pressedKeys = new HashSet<>();
 
-class InputManager {
     public InputManager(Window window) {
         //add key/mouse listeners
+        window.addKeyListener(this);
+        window.setFocusable(true);
+        window.requestFocusInWindow();
+    }
+    
+    public boolean isKeyPressed(int keyCode) {
+        return pressedKeys.contains(keyCode);
     }
 
-    public void update() {
-        //check which keys are down, mouse positions, etc.
+    @Override
+    public void keyPressed(KeyEvent e) {
+        pressedKeys.add(e.getKeyCode());
     }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        pressedKeys.remove(e.getKeyCode());
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
 }   
 
 

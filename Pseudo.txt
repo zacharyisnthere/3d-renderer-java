@@ -10,7 +10,7 @@ Math helpers
 TODO:
 X- aspect ratio corrections
 - make cube spin?
-- render edges between vertexes on cube
+X- render edges between vertexes on cube
 - render faces on cube
 - add camera controls (rotation, position)
 
