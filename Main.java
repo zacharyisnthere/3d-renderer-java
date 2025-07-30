@@ -408,6 +408,23 @@ class Point3D {
         return new Point3D(this.x * factor, this.y * factor, this.z * factor);
     }
 
+    public Point3D cross(Point3D other) {
+        return new Point3D(
+            this.y * other.z - this.z * other.y,
+            this.z * other.x - this.x * other.z,
+            this.x * other.y - this.y * other.x
+        );
+    }
+
+    public double dot(Point3D other) {
+        return this.x * other.x + this.y * other.y + this.z * other.z;
+    }
+
+    public Point3D normalize() {
+        double len = Math.sqrt(x*x + y*y + z*z);
+        return new Point3D(x/len, y/len, z/len);
+    }
+
     //overridden toString function for good debugging later on
     @Override
     public String toString() {
@@ -437,5 +454,16 @@ class Face {
         this.v2 = v2;
         this.v3 = v3;
         this.color = color;
+    }
+
+    public Point3D getNormal(Point3D[] vertices, Point3D pos) {
+        Point3D p1 = vertices[v1].add(pos);
+        Point3D p2 = vertices[v2].add(pos);
+        Point3D p3 = vertices[v3].add(pos);
+
+        Point3D u = p2.subtract(p1);
+        Point3D v = p3.subtract(p1);
+
+        return u.cross(v).normalize();
     }
 }
