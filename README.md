@@ -1,3 +1,4 @@
+![3D Renderer Screenshot](screenshots/3d-renderer-screenshot_07-30-2025.png)
 # 3d Renderer (java)
 ### Overview
 This is a very simple 1-file 3d-rendering engine build with Java Swing for my CSIS 1400 Intro to Programming class. It demonstrates projection, camera movement and rotation, backface culling, and depth sorting without external libraries. 
@@ -23,9 +24,9 @@ java Main
 ```
 
 ### Controls
-**WASD** - Move around
-**Q/E** - Move down/up
-**Arrow keys** - rotate left/right up/down
+* **WASD** - Move around
+* **Q/E** - Move down/up
+* **Arrow keys** - rotate left/right up/down
 
 ### Future Ideas
 * Add more primitive shapes and meshes (sphere, pyramid, plane)
