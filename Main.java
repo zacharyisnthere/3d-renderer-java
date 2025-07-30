@@ -3,6 +3,7 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -153,9 +154,30 @@ class RenderPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        g2d.setColor(Color.WHITE);
+        List<RenderableFace> allFaces = new ArrayList<>();
+
         for (SceneObject obj : scene.getObjects()) {
-            obj.render(g2d, camera, getWidth(), getHeight());
+            allFaces.addAll(obj.getRenderableFaces(camera, getWidth(), getHeight()));
+        }
+
+        allFaces.sort((a,b) -> Double.compare(b.depth, a.depth));
+
+        for (RenderableFace rf : allFaces) {
+            Face f = rf.face;
+            Point2D p1 = rf.projected[f.v1];
+            Point2D p2 = rf.projected[f.v2];
+            Point2D p3 = rf.projected[f.v3];
+
+            if (p1 != null && p2 != null && p3 != null) {
+                int[] xPoints = {(int) p1.getX(), (int) p2.getX(), (int) p3.getX()};
+                int[] yPoints = {(int) p1.getY(), (int) p2.getY(), (int) p3.getY()};
+
+                g2d.setColor(f.color);
+                g2d.fillPolygon(xPoints, yPoints, 3);
+
+                g2d.setColor(Color.BLACK);
+                g2d.drawPolygon(xPoints, yPoints, 3);
+            }
         }
     }
 }
@@ -240,8 +262,11 @@ class Scene {
 // Polymorphism!
 // abstract means it cannot be instantiated on its own, which is important.
 // abstract on a method requires every class that extends this one to provide its own implementation of this method.
+
+//change from rendering every face on the object to making a list of the renderable faces and exporting it to Renderer
 abstract class SceneObject {
-    public abstract void render(Graphics2D g, Camera camera, int width, int height);
+    public abstract List<RenderableFace> getRenderableFaces(Camera camera, int width, int height);
+    // public abstract void render(Graphics2D g, Camera camera, int width, int height);
 }
 
 
@@ -336,8 +361,9 @@ class Cube extends SceneObject {
     }
 
     @Override
-    public void render(Graphics2D g, Camera cam, int width, int height) {
-        //project all vertices first
+    public List<RenderableFace> getRenderableFaces(Camera cam, int width, int height) {
+        List<RenderableFace> renderList = new ArrayList<>();
+
         Point2D[] projected = new Point2D[vertices.length];
         Point3D[] worldVerts = new Point3D[vertices.length];
         for (int i=0; i<vertices.length; i++) {
@@ -345,39 +371,66 @@ class Cube extends SceneObject {
             projected[i] = cam.project(worldVerts[i], width, height);
         }
 
-        // //draw edges
-        // g.setColor(Color.WHITE);
-        // for (Edge e : edges) {
-        //     Point2D p1 = projected[e.start];
-        //     Point2D p2 = projected[e.end];
-
-        //     if (p1!=null && p2!=null) {
-        //         g.drawLine( (int) p1.getX(), (int) p1.getY(), 
-        //                     (int) p2.getX(), (int) p2.getY());
-        //     }
-        // }
-
-        //draw faces
         for (Face f : faces) {
             Point3D normal = f.getNormal(vertices, pos); //compute face normal
             Point3D toCamera = cam.pos.subtract(worldVerts[f.v1]); //vector from camera to the first vertex of the face
             
             //if dot prodcut<0, face is visible
             if (normal.dot(toCamera) < 0) {
-                Point2D p1 = projected[f.v1];
-                Point2D p2 = projected[f.v2];
-                Point2D p3 = projected[f.v3];
-                if (p1!=null && p2!=null && p3!=null) {
-                    int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
-                    int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
-                    g.setColor(f.color);
-                    g.fillPolygon(xPoints, yPoints, 3);
-                    g.setColor(Color.BLACK);
-                    g.drawPolygon(xPoints, yPoints, 3);
-                }
+                double depth = f.getAverageDepth(vertices, pos, cam);
+                renderList.add(new RenderableFace(f, projected, depth));
             }
         }
+
+        return renderList;
     }
+
+
+
+
+    // @Override
+    // public void render(Graphics2D g, Camera cam, int width, int height) {
+    //     //project all vertices first
+    //     Point2D[] projected = new Point2D[vertices.length];
+    //     Point3D[] worldVerts = new Point3D[vertices.length];
+    //     for (int i=0; i<vertices.length; i++) {
+    //         worldVerts[i] = vertices[i].add(pos);
+    //         projected[i] = cam.project(worldVerts[i], width, height);
+    //     }
+
+    //     // //draw edges
+    //     // g.setColor(Color.WHITE);
+    //     // for (Edge e : edges) {
+    //     //     Point2D p1 = projected[e.start];
+    //     //     Point2D p2 = projected[e.end];
+
+    //     //     if (p1!=null && p2!=null) {
+    //     //         g.drawLine( (int) p1.getX(), (int) p1.getY(), 
+    //     //                     (int) p2.getX(), (int) p2.getY());
+    //     //     }
+    //     // }
+
+    //     //draw faces
+    //     for (Face f : faces) {
+    //         Point3D normal = f.getNormal(vertices, pos); //compute face normal
+    //         Point3D toCamera = cam.pos.subtract(worldVerts[f.v1]); //vector from camera to the first vertex of the face
+            
+    //         //if dot prodcut<0, face is visible
+    //         if (normal.dot(toCamera) < 0) {
+    //             Point2D p1 = projected[f.v1];
+    //             Point2D p2 = projected[f.v2];
+    //             Point2D p3 = projected[f.v3];
+    //             if (p1!=null && p2!=null && p3!=null) {
+    //                 int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
+    //                 int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
+    //                 g.setColor(f.color);
+    //                 g.fillPolygon(xPoints, yPoints, 3);
+    //                 g.setColor(Color.BLACK);
+    //                 g.drawPolygon(xPoints, yPoints, 3);
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 
@@ -472,5 +525,30 @@ class Face {
         Point3D v = p3.subtract(p1);
 
         return u.cross(v).normalize();
+    }
+
+
+    public double getAverageDepth(Point3D[] vertices, Point3D pos, Camera cam) {
+        Point3D p1 = vertices[v1].add(pos);
+        Point3D p2 = vertices[v2].add(pos);
+        Point3D p3 = vertices[v3].add(pos);
+
+        double z1 = cam.pos.subtract(p1).z;
+        double z2 = cam.pos.subtract(p2).z;
+        double z3 = cam.pos.subtract(p3).z;        
+
+        return (z1 + z2 + z3) / 3.0;
+    }
+}
+
+class RenderableFace {
+    public Face face;
+    public Point2D[] projected;
+    public double depth;
+
+    public RenderableFace(Face face, Point2D[] projected, double depth) {
+        this.face = face;
+        this.projected = projected;
+        this.depth = depth;
     }
 }
