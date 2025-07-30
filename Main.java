@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
-
 import javax.swing.JComponent;
 
 public class Main {
@@ -86,6 +85,13 @@ class Renderer {
         //clear screen
         //project 3d coordinates to 2d based on camera
         //draw shapes with Graphics2D
+
+        Graphics2D g = (Graphics2D) window.getGraphics();
+        g.setColor(Color.BLACK);
+        g.fillRect(0,0,window.getWidth(),window.getHeight());
+
+        g.setColor(Color.RED);
+        g.drawLine(100,100,200,200);
     }
 }
 
@@ -109,6 +115,18 @@ class Scene {
 
 class SceneObject {
 
+}
+
+
+class Camera {
+    public Point3D pos;
+    //rotation variable
+
+    //camera variables, will be more useful later
+    public double fov = 60;
+    public double clip_far = 100;
+    public double clip_near = 0.01;
+    
 }
 
 
