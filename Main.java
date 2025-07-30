@@ -528,17 +528,12 @@ class Face {
         return u.cross(v).normalize();
     }
 
-
     public double getAverageDepth(Point3D[] vertices, Point3D pos, Camera cam) {
-        Point3D p1 = vertices[v1].add(pos);
-        Point3D p2 = vertices[v2].add(pos);
-        Point3D p3 = vertices[v3].add(pos);
+        Point3D p1 = cam.toCameraSpace(vertices[v1].add(pos));
+        Point3D p2 = cam.toCameraSpace(vertices[v2].add(pos));
+        Point3D p3 = cam.toCameraSpace(vertices[v3].add(pos));      
 
-        double z1 = cam.pos.subtract(p1).z;
-        double z2 = cam.pos.subtract(p2).z;
-        double z3 = cam.pos.subtract(p3).z;        
-
-        return (z1 + z2 + z3) / 3.0;
+        return (p1.z + p2.z + p3.z) / 3.0;
     }
 }
 
