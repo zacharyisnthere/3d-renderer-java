@@ -24,9 +24,9 @@ java Main
 ```
 
 ### Controls
-**WASD** - Move around
-**Q/E** - Move down/up
-**Arrow keys** - rotate left/right up/down
+* **WASD** - Move around
+* **Q/E** - Move down/up
+* **Arrow keys** - rotate left/right up/down
 
 ### Future Ideas
 * Add more primitive shapes and meshes (sphere, pyramid, plane)
