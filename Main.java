@@ -9,10 +9,8 @@ import javax.swing.JComponent;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Engine engine = new Engine();
-            engine.start();
-        });
+        Engine engine = new Engine();
+        engine.start();        
     }
 }
 
@@ -28,9 +26,8 @@ class Engine {
     private final int TARGET_FPS = 60;
 
     public void start() {
-        SwingUtilities.invokeLater(() -> init());
-
-        new Thread(() -> runLoop()).start();
+        init();
+        new Thread(this::runLoop).start();
     }
 
     private void init() {
