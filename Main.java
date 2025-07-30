@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import javax.swing.JComponent;
 
 public class Main {
@@ -17,6 +20,7 @@ class Engine {
     private InputManager input;
     private Scene scene;
     private Camera camera;
+
     private boolean running;
     private final int TARGET_FPS = 60;
 
@@ -32,7 +36,7 @@ class Engine {
         scene = new Scene();
         camera = new Camera();
 
-        scene.objects.add(new Cube());
+        scene.add(new Cube());
         running = true;
     }
 
@@ -43,11 +47,11 @@ class Engine {
             long start = System.currentTimeMillis();
 
             input.update();
-            update();          // game logic
-            renderer.renderScene(scene, camera); // draw to screen
+            update();
+            renderer.renderScene(scene, camera);
 
             long duration = System.currentTimeMillis() - start;
-            sleep(frameTime - duration); // maintains fps
+            sleep(frameTime - duration);
         }
     }
 
@@ -109,7 +113,7 @@ class Renderer {
 
         //draw stuff
         g.setColor(Color.WHITE);
-        for (SceneObject obj : scene.objects) {
+        for (SceneObject obj : scene.getObjects()) {
             obj.render(g, camera, window.getWidth(), window.getHeight());
         }
 
@@ -132,10 +136,23 @@ class InputManager {
 
 
 class Scene {
-    public java.util.List<SceneObject> objects = new java.util.ArrayList<>();
+    private java.util.List<SceneObject> objects = new java.util.ArrayList<>();
+
+    public java.util.List<SceneObject> getObjects(){
+        return objects;
+    }
+
+    public void add(SceneObject o) {
+        objects.add(o);
+    }
+
+    public void remove(SceneObject o) {
+        objects.remove(o);
+    } 
 }
 
 
+// Polymorphism!
 // abstract means it cannot be instantiated on its own, which is important.
 abstract class SceneObject {
     // abstract on a method requires every class that extends this one to provide its own implementation of this method.
