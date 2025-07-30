@@ -194,14 +194,13 @@ class Camera {
 
 class Cube extends SceneObject {
     //maybe there should just be a general transform class on every Scene object?
-    public Point3D pos = new Point3D(0,0,0);
+    public Point3D pos = new Point3D(0,0,5);
 
-    private Point3D[] local_vertices;
     private Point3D[] vertices;
 
 
     public Cube() {
-        local_vertices = new Point3D[] {
+        vertices = new Point3D[] {
             new Point3D(-1, -1, -1),
             new Point3D( 1, -1, -1),
             new Point3D( 1,  1, -1),
@@ -211,18 +210,17 @@ class Cube extends SceneObject {
             new Point3D( 1,  1,  1),
             new Point3D(-1,  1,  1)
         };
-
-        vertices = local_vertices;
-        for (Point3D v : vertices) {
-            v = v.add(pos);
-        }
     }
 
     @Override
     public void render(Graphics2D g, Camera cam, int width, int height) {
-        for (Point3D v: vertices) {
-            Point2D p = cam.project(v, width, height);
-            g.fillOval((int)p.getX(), (int)p.getY(), 5, 5);
+        for (Point3D local_v: vertices) {
+            Point3D world_v = local_v.add(pos);
+
+            Point2D p = cam.project(world_v, width, height);
+            if (p != null) {
+                g.fillOval((int)p.getX(), (int)p.getY(), 5, 5);
+            }
         }
     }
 }
