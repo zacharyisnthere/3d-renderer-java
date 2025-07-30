@@ -70,35 +70,43 @@ class Engine {
     }
 
     private void update() {
-        double moveSpeed = 0.1;
-        double rotSpeed = 0.02;
+        double moveSpeed = 0.01;
+        double rotSpeed = 0.001;
+        double frameMoveSpeed = moveSpeed * 1000/TARGET_FPS;
+        double frameRotSpeed = rotSpeed * 1000/TARGET_FPS;
 
         //movement (relative to yaw)
         double forwardX = Math.sin(camera.yaw);
         double forwardZ = Math.cos(camera.yaw);
 
         if (input.isKeyPressed(KeyEvent.VK_W)) {
-            camera.pos.x += forwardX * moveSpeed;
-            camera.pos.z += forwardZ * moveSpeed;
+            camera.pos.x += forwardX * frameMoveSpeed;
+            camera.pos.z += forwardZ * frameMoveSpeed;
         }
         if (input.isKeyPressed(KeyEvent.VK_S)) {
-            camera.pos.x -= forwardX * moveSpeed;
-            camera.pos.z -= forwardZ * moveSpeed;
+            camera.pos.x -= forwardX * frameMoveSpeed;
+            camera.pos.z -= forwardZ * frameMoveSpeed;
         }
         if (input.isKeyPressed(KeyEvent.VK_A)) {
-            camera.pos.x += forwardX * moveSpeed;
-            camera.pos.z += forwardZ * moveSpeed;
+            camera.pos.x -= forwardZ * frameMoveSpeed;
+            camera.pos.z += forwardX * frameMoveSpeed;
         }
         if (input.isKeyPressed(KeyEvent.VK_D)) {
-            camera.pos.x += forwardX * moveSpeed;
-            camera.pos.z += forwardZ * moveSpeed;
+            camera.pos.x += forwardZ * frameMoveSpeed;
+            camera.pos.z -= forwardX * frameMoveSpeed;
+        }
+        if (input.isKeyPressed(KeyEvent.VK_Q)) {
+            camera.pos.y -= frameMoveSpeed;
+        }
+        if (input.isKeyPressed(KeyEvent.VK_E)) {
+            camera.pos.y += frameMoveSpeed;
         }
 
         // Rotation
-        if (input.isKeyPressed(KeyEvent.VK_LEFT))  camera.yaw -= rotSpeed;
-        if (input.isKeyPressed(KeyEvent.VK_RIGHT)) camera.yaw += rotSpeed;
-        if (input.isKeyPressed(KeyEvent.VK_UP))    camera.pitch -= rotSpeed;
-        if (input.isKeyPressed(KeyEvent.VK_DOWN))  camera.pitch += rotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_LEFT))  camera.yaw -= frameRotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_RIGHT)) camera.yaw += frameRotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_UP))    camera.pitch += frameRotSpeed;
+        if (input.isKeyPressed(KeyEvent.VK_DOWN))  camera.pitch -= frameRotSpeed;
 
         if (input.isKeyPressed(KeyEvent.VK_SPACE)) {
             System.out.println("Space pressed");
