@@ -70,6 +70,8 @@ class Engine {
     private void update() {
         //update camera, objects, etc.
         //need a scene class soon
+
+        System.out.println(scene.getObjects());
     }
 }
 
@@ -191,17 +193,15 @@ class Camera {
 
 
 class Cube extends SceneObject {
-    // 8xyz vertices, list of edges
-    // render method the projects 3d to 2d based on a given Camera position
-
-    public Point3D pos = new Point3D(0,0,0);
     //maybe there should just be a general transform class on every Scene object?
+    public Point3D pos = new Point3D(0,0,0);
 
+    private Point3D[] local_vertices;
     private Point3D[] vertices;
 
 
     public Cube() {
-        vertices = new Point3D[] {
+        local_vertices = new Point3D[] {
             new Point3D(-1, -1, -1),
             new Point3D( 1, -1, -1),
             new Point3D( 1,  1, -1),
@@ -211,6 +211,11 @@ class Cube extends SceneObject {
             new Point3D( 1,  1,  1),
             new Point3D(-1,  1,  1)
         };
+
+        vertices = local_vertices;
+        for (Point3D v : vertices) {
+            v = v.add(pos);
+        }
     }
 
     @Override
