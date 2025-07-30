@@ -239,8 +239,8 @@ class Scene {
 
 // Polymorphism!
 // abstract means it cannot be instantiated on its own, which is important.
+// abstract on a method requires every class that extends this one to provide its own implementation of this method.
 abstract class SceneObject {
-    // abstract on a method requires every class that extends this one to provide its own implementation of this method.
     public abstract void render(Graphics2D g, Camera camera, int width, int height);
 }
 
@@ -339,9 +339,10 @@ class Cube extends SceneObject {
     public void render(Graphics2D g, Camera cam, int width, int height) {
         //project all vertices first
         Point2D[] projected = new Point2D[vertices.length];
+        Point3D[] worldVerts = new Point3D[vertices.length];
         for (int i=0; i<vertices.length; i++) {
-            Point3D worldV = vertices[i].add(pos);
-            projected[i] = cam.project(worldV, width, height);
+            worldVerts[i] = vertices[i].add(pos);
+            projected[i] = cam.project(worldVerts[i], width, height);
         }
 
         // //draw edges
@@ -358,16 +359,22 @@ class Cube extends SceneObject {
 
         //draw faces
         for (Face f : faces) {
-            Point2D p1 = projected[f.v1];
-            Point2D p2 = projected[f.v2];
-            Point2D p3 = projected[f.v3];
-            if (p1!=null && p2!=null && p3!=null) {
-                int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
-                int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
-                g.setColor(f.color);
-                g.fillPolygon(xPoints, yPoints, 3);
-                g.setColor(Color.BLACK);
-                g.drawPolygon(xPoints, yPoints, 3);
+            Point3D normal = f.getNormal(vertices, pos); //compute face normal
+            Point3D toCamera = cam.pos.subtract(worldVerts[f.v1]); //vector from camera to the first vertex of the face
+            
+            //if dot prodcut<0, face is visible
+            if (normal.dot(toCamera) < 0) {
+                Point2D p1 = projected[f.v1];
+                Point2D p2 = projected[f.v2];
+                Point2D p3 = projected[f.v3];
+                if (p1!=null && p2!=null && p3!=null) {
+                    int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
+                    int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
+                    g.setColor(f.color);
+                    g.fillPolygon(xPoints, yPoints, 3);
+                    g.setColor(Color.BLACK);
+                    g.drawPolygon(xPoints, yPoints, 3);
+                }
             }
         }
     }
