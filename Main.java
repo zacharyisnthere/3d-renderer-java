@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.desktop.ScreenSleepEvent;
 import java.awt.geom.Point2D;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -8,8 +9,10 @@ import javax.swing.JComponent;
 
 public class Main {
     public static void main(String[] args) {
-        Engine engine = new Engine();
-        engine.start();
+        SwingUtilities.invokeLater(() -> {
+            Engine engine = new Engine();
+            engine.start();
+        });
     }
 }
 
@@ -25,16 +28,17 @@ class Engine {
     private final int TARGET_FPS = 60;
 
     public void start() {
-        init();
-        runLoop();
+        SwingUtilities.invokeLater(() -> init());
+
+        new Thread(() -> runLoop()).start();
     }
 
     private void init() {
-        window = new Window("3D Renderer", 800, 600);
-        renderer = new Renderer(window);
-        input = new InputManager(window);
         scene = new Scene();
         camera = new Camera();
+        window = new Window("3D Renderer", 800, 600, scene, camera);
+        renderer = new Renderer(window);
+        input = new InputManager(window);
 
         scene.add(new Cube());
         running = true;
@@ -70,18 +74,44 @@ class Engine {
     private void update() {
         //update camera, objects, etc.
         //need a scene class soon
-
-        System.out.println(scene.getObjects());
     }
 }
 
 
 class Window extends JFrame {
-    public Window(String title, int width, int height) {
+    public RenderPanel panel;
+
+    public Window(String title, int width, int height, Scene scene, Camera camera) {
         super(title);
         setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        panel = new RenderPanel(scene, camera);
+        add(panel);
         setVisible(true);
+    }
+}
+
+
+class RenderPanel extends JPanel {
+    private Scene scene;
+    private Camera camera;
+
+    public RenderPanel(Scene scene, Camera camera) {
+        this.scene = scene;
+        this.camera = camera;
+        setBackground(Color.BLACK);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setColor(Color.WHITE);
+        for (SceneObject obj : scene.getObjects()) {
+            obj.render(g2d, camera, getWidth(), getHeight());
+        }
     }
 }
 
@@ -93,34 +123,20 @@ class Renderer {
         this.window = window;
     }
 
-    public void render() {
-        //clear screen
-        //project 3d coordinates to 2d based on camera
-        //draw shapes with Graphics2D
-
-        Graphics2D g = (Graphics2D) window.getGraphics();
-        g.setColor(Color.BLACK);
-        g.fillRect(0,0,window.getWidth(),window.getHeight());
-
-        g.setColor(Color.RED);
-        g.drawLine(100,100,200,200);
-    }
-
     public void renderScene(Scene scene, Camera camera) {
-        Graphics2D g = (Graphics2D) window.getGraphics();
+        SwingUtilities.invokeLater(() -> window.panel.repaint());
 
-        //clear screen
-        g.setColor(Color.BLACK);
-        g.fillRect(0,0,window.getWidth(),window.getHeight());
+        // Graphics2D g = (Graphics2D) window.getGraphics();
 
-        //draw stuff
-        g.setColor(Color.WHITE);
-        for (SceneObject obj : scene.getObjects()) {
-            obj.render(g, camera, window.getWidth(), window.getHeight());
-        }
+        // //clear screen
+        // g.setColor(Color.BLACK);
+        // g.fillRect(0,0,window.getWidth(),window.getHeight());
 
-
-
+        // //draw stuff
+        // g.setColor(Color.WHITE);
+        // for (SceneObject obj : scene.getObjects()) {
+        //     obj.render(g, camera, window.getWidth(), window.getHeight());
+        // }
     }
 }
 
@@ -180,6 +196,8 @@ class Camera {
         double x = point.x - pos.x;
         double y = point.y - pos.y;
         double z = point.z - pos.z;
+
+        if (z<=clip_near) return null;
 
         // projection math and stuff. screenY is flipped because 0,0 is top left which is odd.
         double f = 1.0 / Math.tan(Math.toRadians(fov) / 2);
