@@ -197,6 +197,8 @@ class Camera {
         if (z<=clip_near) return null;
 
         // projection math and stuff. screenY is flipped because 0,0 is top left which is odd.
+        // f is the vertical fov, so when the screen isn't square the horizontal scaling is weird.
+        // by dividing f by the ratio of screen width/height, the screenX value is corrected.
 
         double aspect = (double) screenWidth / screenHeight;
         double f = 1.0 / Math.tan(Math.toRadians(fov) / 2);
