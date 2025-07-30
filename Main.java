@@ -145,7 +145,7 @@ class RenderPanel extends JPanel {
     public RenderPanel(Scene scene, Camera camera) {
         this.scene = scene;
         this.camera = camera;
-        setBackground(Color.BLACK);
+        setBackground(Color.GRAY);
     }
 
     @Override
@@ -297,6 +297,7 @@ class Cube extends SceneObject {
 
     private Point3D[] vertices;
     private Edge[] edges;
+    private Face[] faces;
 
 
     public Cube() {
@@ -316,6 +317,22 @@ class Cube extends SceneObject {
             new Edge(4, 5), new Edge(5, 6), new Edge(6, 7), new Edge(7, 4), //top square
             new Edge(0, 4), new Edge(1, 5), new Edge(2, 6), new Edge(3, 7)  //verticals
         };
+
+        //12 triangles (2 per cube face)
+        faces = new Face[] {
+            // front (-Z)
+            new Face(0,1,2, Color.RED), new Face(0,2,3, Color.RED),
+            // back (+Z)
+            new Face(5,4,7, Color.GREEN), new Face(5,7,6, Color.GREEN),
+            // left (-X)
+            new Face(4,0,3, Color.BLUE), new Face(4,3,7, Color.BLUE),
+            // right (+X)
+            new Face(1,5,6, Color.CYAN), new Face(1,6,2, Color.CYAN),
+            // bottom (-Y)
+            new Face(4,5,1, Color.MAGENTA), new Face(4,1,0, Color.MAGENTA),
+            // top (+Y)
+            new Face(3,2,6, Color.YELLOW), new Face(3,6,7, Color.YELLOW)
+        };
     }
 
     @Override
@@ -327,15 +344,30 @@ class Cube extends SceneObject {
             projected[i] = cam.project(worldV, width, height);
         }
 
-        //draw edges
-        g.setColor(Color.WHITE);
-        for (Edge e : edges) {
-            Point2D p1 = projected[e.start];
-            Point2D p2 = projected[e.end];
+        // //draw edges
+        // g.setColor(Color.WHITE);
+        // for (Edge e : edges) {
+        //     Point2D p1 = projected[e.start];
+        //     Point2D p2 = projected[e.end];
 
-            if (p1!=null && p2!=null) {
-                g.drawLine( (int) p1.getX(), (int) p1.getY(), 
-                            (int) p2.getX(), (int) p2.getY());
+        //     if (p1!=null && p2!=null) {
+        //         g.drawLine( (int) p1.getX(), (int) p1.getY(), 
+        //                     (int) p2.getX(), (int) p2.getY());
+        //     }
+        // }
+
+        //draw faces
+        for (Face f : faces) {
+            Point2D p1 = projected[f.v1];
+            Point2D p2 = projected[f.v2];
+            Point2D p3 = projected[f.v3];
+            if (p1!=null && p2!=null && p3!=null) {
+                int[] xPoints = {(int)p1.getX(), (int)p2.getX(), (int)p3.getX()};
+                int[] yPoints = {(int)p1.getY(), (int)p2.getY(), (int)p3.getY()};
+                g.setColor(f.color);
+                g.fillPolygon(xPoints, yPoints, 3);
+                g.setColor(Color.BLACK);
+                g.drawPolygon(xPoints, yPoints, 3);
             }
         }
     }
@@ -392,5 +424,18 @@ class Edge {
     public Edge(int start, int end) {
         this.start = start;
         this.end = end;
+    }
+}
+
+
+class Face {
+    public int v1, v2, v3;
+    public Color color;
+
+    public Face(int v1, int v2, int v3, Color color) {
+        this.v1 = v1;
+        this.v2 = v2;
+        this.v3 = v3;
+        this.color = color;
     }
 }
