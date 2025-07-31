@@ -1,14 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.swing.*;
-import javax.swing.JComponent;
 
 public class Main {
     public static void main(String[] args) {
