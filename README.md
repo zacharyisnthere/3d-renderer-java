@@ -19,8 +19,11 @@ cd 3d-renderer-java
 
 2. Compile and run:
 ```
-javac Main.java
-java Main
+cd path/to/3d-renderer-java-main/
+mkdir -p out \
+&& javac -d out -sourcepath src $(find src/renderer -name "*.java")
+cd out
+java renderer.Main
 ```
 
 ### Controls
