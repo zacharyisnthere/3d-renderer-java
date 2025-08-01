@@ -13,13 +13,12 @@ This is a very simple 1-file 3d-rendering engine build with Java Swing for my CS
 1. Clone the repository:
 ```
 git clone https://github.com/zacharyisnthere/3d-renderer-java
-cd 3d-renderer-java
 ```
 (or download as ZIP and extract)
 
 2. Compile and run:
 ```
-cd path/to/3d-renderer-java-main/
+cd path/to/3d-renderer-java/
 ```
 ```
 mkdir -p out \
